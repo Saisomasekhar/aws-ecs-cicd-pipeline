@@ -42,22 +42,22 @@ jobs:
         run: |
           IMAGE_TAG=$(date +%s)
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          docker build -t vcube-137:$IMAGE_TAG .
+          docker build -t react:$IMAGE_TAG .
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          docker tag vcube-137:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
+          docker tag saisomasekhar-project4:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
           docker push $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
 
-      - name: 📝 Update ECS Task Definition
-        run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:${{ env.IMAGE_TAG }}|g" task-definition.json
+      # - name: 📝 Update ECS Task Definition
+      #   run: |
+      #     ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      #     sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:${{ env.IMAGE_TAG }}|g" task-definition.json
 
-      - name: 🚀 Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: task-definition.json
-          service: vcube-service
-          cluster: vcube-137
-          wait-for-service-stability: true
+      # - name: 🚀 Deploy to ECS
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      #   with:
+      #     task-definition: task-definition.json
+      #     service: vcube-service
+      #     cluster: vcube-137
+      #     wait-for-service-stability: true
 
       
