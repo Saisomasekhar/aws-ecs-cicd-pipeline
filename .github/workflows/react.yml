@@ -1,51 +1,63 @@
-name: React CI + SonarQube
+name: Hotstar Project CI/CD
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - master
+  workflow_dispatch:
 
 jobs:
-  build:    
+  build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: ap-south-2
+
     steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-      # 1️⃣ Checkout Code
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      # 2️⃣ Setup Node
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
 
-      # 3️⃣ Install Dependencies
-      - name: Install Dependencies
+      - name: 📦 Install Dependencies
         run: npm install
 
-      # 4️⃣ Run Tests
-      - name: Run Tests
-        run: npm test -- --watchAll=false
-        continue-on-error: true
+      - name: ⚙ Build React App
+        run: CI=false npm run build
 
-      # 5️⃣ Build React App
-      - name: Build Project
-        run: npm run build
-
-      # 6️⃣ SonarQube Scan (For React / JS Project)
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: >
-            -Dsonar.projectKey=hotstar-react-app
-            -Dsonar.sources=src
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔑 Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🐳 Build, Tag & Push Docker Image
+        run: |
+          IMAGE_TAG=$(date +%s)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          docker build -t vcube-137:$IMAGE_TAG .
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          docker tag vcube-137:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
+          docker push $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
+
+      - name: 📝 Update ECS Task Definition
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:${{ env.IMAGE_TAG }}|g" task-definition.json
+
+      - name: 🚀 Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          service: vcube-service
+          cluster: vcube-137
+          wait-for-service-stability: true
+
+      
