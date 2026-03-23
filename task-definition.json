@@ -1,0 +1,21 @@
+{
+  "family": "hotstar-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::312846472889:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "hotstar",
+      "image": "312846472889.dkr.ecr.ap-south-2.amazonaws.com/vcube-137:1767166031",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true
+    }
+  ]
+}
