@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: ap-south-2
+      AWS_REGION: us-east-1
 
     steps:
       - name: 📥 Checkout Code
@@ -44,13 +44,13 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           docker build -t react:$IMAGE_TAG .
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          docker tag saisomasekhar-project4:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
-          docker push $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:$IMAGE_TAG
+          docker tag saisomasekhar-project4:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/saisomasekhar-project4:$IMAGE_TAG
+          docker push $ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/saisomasekhar-project4:$IMAGE_TAG
 
       # - name: 📝 Update ECS Task Definition
       #   run: |
       #     ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      #     sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/vcube-137:${{ env.IMAGE_TAG }}|g" task-definition.json
+      #     sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/saisomasekhar-project4:${{ env.IMAGE_TAG }}|g" task-definition.json
 
       # - name: 🚀 Deploy to ECS
       #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
