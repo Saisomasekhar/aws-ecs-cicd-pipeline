@@ -168,25 +168,6 @@ aws-ecs-cicd-pipeline/
     └── deployment-guide.md
 ```
 
----
-
-## 🐳 Dockerfile
-
-A basic Dockerfile can be structured as:
-
-```dockerfile
-FROM nginx:alpine
-
-COPY . /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-> Replace this example with the Dockerfile required by the actual application.
-
----
 
 ## ⚙️ GitHub Actions Workflow
 
@@ -640,6 +621,3 @@ This project was created for hands-on learning and demonstrating practical exper
 
 ---
 
-## 📜 License
-
-This project is intended for educational and portfolio purposes.
