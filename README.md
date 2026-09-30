@@ -44,7 +44,7 @@ Running Container
 
 ## 🏗️ Architecture Diagram
 
-![AWS ECS CI/CD Architecture](![alt text](image.png))
+![AWS ECS CI/CD Architecture](C:\Users\saiso\OneDrive\Desktop\New folder)
 
 > Place the project architecture image at `screenshots/architecture.png` for the image to display correctly on GitHub.
 
